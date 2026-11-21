@@ -1,0 +1,34 @@
+<!doctype html><meta charset="utf-8"><title>sim</title>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }</script>
+<div style="display:none"><span id="hud-title"></span><span id="hud-info"></span><div id="hint"></div><div id="toast"></div>
+<div id="bar-a"><span></span><div><i></i></div></div><div id="bar-b"><span></span><div><i></i></div></div></div>
+<pre id="out">running</pre>
+<script type="module">
+import { THREE, input, endFrame } from '../js/common.js';
+import { LEVELS } from '../js/levels.js';
+const q = new URLSearchParams(location.search); const n = +q.get('level');
+let won = false, lost = '', err = '';
+const ctx = { camera: new THREE.PerspectiveCamera(), win() { won = true; }, lose(m) { lost = m; } };
+let steps = 0, lv;
+try {
+  lv = LEVELS[n].make(ctx);
+  if (lv.cfg && lv.cfg.length) { lv.cfg.hitPenalty = 0; lv.cfg.gapMax = 99; lv.gap = 50; }
+  for (; steps < 60 * 150 && !won && !lost; steps++) {
+    input.down = {};
+    if (q.has('hold')) input.down.KeyE = true;
+    const go = (tx, tz) => { const dx = tx - lv.pos.x, dz = tz - lv.pos.z; if (Math.abs(dx) > 0.3) input.down[dx > 0 ? 'KeyD' : 'KeyA'] = true; if (Math.abs(dz) > 0.3) input.down[dz > 0 ? 'KeyS' : 'KeyW'] = true; return Math.hypot(dx, dz); };
+    if (q.has('shipbot')) {
+      const open = lv.leaks.filter((l) => l.state === 'open').sort((a, b) => Math.hypot(a.pos.x - lv.pos.x, a.pos.z - lv.pos.z) - Math.hypot(b.pos.x - lv.pos.x, b.pos.z - lv.pos.z))[0];
+      const tgt = open ? { x: open.pos.x + (open.edge === 'back' ? 0 : (open.pos.x < 0 ? 1 : -1)), z: open.pos.z + (open.edge === 'back' ? 1.2 : 0) } : { x: lv.pumpPos.x + 1, z: lv.pumpPos.z };
+      const d = go(tgt.x, tgt.z); if (d < 0.8) input.down.KeyE = true;
+    }
+    if (q.has('arenabot')) {
+      if (lv.padOpen > 0) { const m = Math.hypot(lv.pos.x, lv.pos.z) || 1; go(-lv.pos.x / m * 11, -lv.pos.z / m * 11); }
+      else { const l = lv.levers.filter((x) => x.cd <= 0).sort((a, b) => Math.hypot(a.x - lv.pos.x, a.z - lv.pos.z) - Math.hypot(b.x - lv.pos.x, b.z - lv.pos.z))[0]; if (l) { const d = go(l.x, l.z); if (d < 1.2) input.hit.KeyE = true; } }
+    }
+    if (lv.cfg && lv.cfg.length) { lv.gap = Math.max(lv.gap, 8); if (steps % 50 === 0) input.hit.Space = true; if (steps % 90 === 0) input.hit.KeyA = true; if (steps % 130 === 0) input.hit.KeyD = true; }
+    lv.update(1 / 60); endFrame();
+  }
+} catch (e) { err = e.stack.split('\n').slice(0, 3).join(' | '); }
+document.getElementById('out').textContent = `RESULT level=${n} won=${won} lost=${lost} steps=${steps} err=${err}`;
+</script>

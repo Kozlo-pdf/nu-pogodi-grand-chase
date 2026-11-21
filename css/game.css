@@ -1,0 +1,51 @@
+:root { --red:#d9363e; --cream:#fff4dc; --ink:#2a1b14; --gold:#ffc933; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1018; font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; color: var(--cream); user-select: none; -webkit-user-select: none; touch-action: none; }
+#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; }
+#hud-top { display: flex; gap: 14px; align-items: center; padding: 10px 14px; background: linear-gradient(#000a, transparent); }
+#hud-top .home { pointer-events: auto; color: var(--cream); text-decoration: none; font-size: 22px; line-height: 1; padding: 4px 9px; border: 2px solid #fff5; border-radius: 8px; }
+#hud-title { font-weight: 800; letter-spacing: .02em; text-shadow: 0 2px 0 #0008; }
+#hud-info { margin-left: auto; font-size: 17px; text-shadow: 0 2px 0 #0008; }
+#hud-info b { color: var(--gold); }
+
+#bars { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); width: min(520px, 80vw); display: grid; gap: 8px; }
+.bar span { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; opacity: .9; margin-bottom: 2px; text-shadow: 0 1px 0 #000a; }
+.bar div { height: 12px; border-radius: 8px; background: #0007; border: 2px solid #fff6; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7be08c, #2fbf5b); transition: width .1s; }
+.bar.danger i { background: linear-gradient(90deg, #ff9a5a, #e8362b); }
+
+#hint { position: absolute; bottom: 24%; left: 50%; transform: translateX(-50%); padding: 8px 18px; border-radius: 999px; background: #000b; font-weight: 700; opacity: 0; transition: opacity .15s; }
+#hint.on { opacity: 1; }
+#toast { position: absolute; bottom: 12%; left: 50%; transform: translate(-50%, 12px); max-width: min(720px, 90vw); text-align: center; padding: 10px 20px; border-radius: 14px; background: #1a0f14e6; border: 2px solid var(--gold); font-weight: 700; opacity: 0; transition: opacity .2s, transform .2s; }
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
+#keys-help { position: absolute; right: 14px; bottom: 8px; font-size: 12px; opacity: .6; }
+
+#card-wrap { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(#0000, #000a); padding: 16px; overflow: auto; }
+#card { width: min(640px, 100%); max-height: 100%; overflow: auto; background: var(--cream); color: var(--ink); border-radius: 22px; border: 5px solid var(--red); box-shadow: 0 10px 0 #0006, 0 0 0 5px var(--cream); padding: 26px 30px; text-align: center; }
+#card .kicker { text-transform: uppercase; letter-spacing: .2em; font-size: 12px; font-weight: 800; color: var(--red); }
+#card h2 { margin: 6px 0 10px; font-size: clamp(24px, 4.6vw, 38px); line-height: 1.1; font-family: Georgia, "Times New Roman", serif; font-style: italic; }
+#card .body { margin: 0 0 12px; line-height: 1.5; font-size: 16px; white-space: pre-line; }
+#card .controls { margin: 0 0 16px; font-size: 13px; background: #2a1b1410; padding: 8px 12px; border-radius: 10px; }
+#card .btns { display: grid; gap: 8px; }
+#card button { font: inherit; font-weight: 800; padding: 12px 16px; border-radius: 12px; border: 3px solid var(--ink); background: #fff; color: var(--ink); cursor: pointer; }
+#card button:hover { background: #ffe9b5; }
+#card button.primary { background: var(--red); color: #fff; border-color: #7e1218; font-size: 18px; }
+#card button.primary:hover { background: #ee464e; }
+#card button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+#touch { display: none; }
+@media (pointer: coarse) {
+  #touch { display: block; position: fixed; inset: auto 0 0 0; height: 0; pointer-events: none; }
+  .pad { position: fixed; bottom: 14px; display: grid; gap: 8px; pointer-events: auto; }
+  .pad.left { left: 14px; grid-template: 1fr 1fr / repeat(3, 56px); grid-template-areas: ". w ." "a s d"; }
+  .pad.left button:nth-child(1) { grid-area: w; } .pad.left button:nth-child(2) { grid-area: a; }
+  .pad.left button:nth-child(3) { grid-area: s; } .pad.left button:nth-child(4) { grid-area: d; }
+  .pad.right { right: 14px; grid-auto-flow: column; align-items: end; }
+  .pad button { width: 56px; height: 56px; border-radius: 14px; border: 2px solid #fff8; background: #0006; color: #fff; font-weight: 800; font-size: 18px; }
+  .pad button.big { width: 96px; height: 80px; }
+  .pad button.on { background: var(--red); }
+  #keys-help { display: none; }
+}

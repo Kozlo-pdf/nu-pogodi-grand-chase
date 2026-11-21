@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>bot</title>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }</script>
+<div style="display:none"><span id="hud-title"></span><span id="hud-info"></span><div id="hint"></div><div id="toast"></div>
+<div id="bar-a"><span></span><div><i></i></div></div><div id="bar-b"><span></span><div><i></i></div></div></div>
+<pre id="out">running</pre>
+<script type="module">
+import { THREE, input, endFrame } from '../js/common.js';
+import { LEVELS } from '../js/levels.js';
+const n = +new URLSearchParams(location.search).get('level');
+let won = false, lost = '';
+const ctx = { camera: new THREE.PerspectiveCamera(), win() { won = true; }, lose(m) { lost = m; } };
+const lv = LEVELS[n].make(ctx);
+if (new URLSearchParams(location.search).has('nohaz')) lv.hazards = [];
+const q = new URLSearchParams(location.search); if (q.has('sx')) { lv.pos.set(+q.get('sx'), 0.1, 0); lv.got = 3; }
+const deaths = {}; let lastG = 0;
+const dt = 1 / 60; let steps = 0, last = 0;
+const press = (k) => { input.hit[k] = true; input.down[k] = true; };
+for (; steps < 60 * 240 && !won; steps++) {
+  input.down = {}; input.down.KeyD = true;
+  if (lv.grounded) {
+    const g = lv.ground; const edge = g.maxx - lv.pos.x;
+    const next = lv.platforms.some((p) => p !== g && p.minx > g.maxx - 0.1 && p.minx - g.maxx < 6 && p.maxy - g.maxy < 4.5);
+    if (edge < 0.45 && next) press('Space');
+    const step = lv.platforms.some((p) => p !== g && p.maxy > g.maxy + 0.3 && p.maxy < g.maxy + 4 && p.minx - lv.pos.x > 0.2 && p.minx - lv.pos.x < 1.0 && Math.abs(p.cur.z - lv.pos.z) < p.d / 2);
+    if (step) press('Space');
+  } else {
+    if (lv.vel.y > 0) input.down.Space = true;
+    const tgt = lv.platforms.filter((p) => p.maxx > lv.pos.x && p.minx - lv.pos.x < 7).sort((a, b) => a.minx - b.minx)[0];
+    if (tgt && lv.vel.y < -1 && lv.jumps < 2 && lv.pos.y < tgt.maxy - 0.2 && tgt.minx - lv.pos.x < 3.5) press('Space');
+  }
+  if (Math.abs(lv.pos.x-80)<0.1 && !window.pass) window.pass = lv.pos.toArray().map(v=>v.toFixed(2)).join(',')+' goal='+lv.goalPos.toArray().join(',');
+  const pp = lv.pos.clone(); lv.update(dt); endFrame(); if (lv.oops !== last && !window.firstDeath) window.firstDeath = pp.toArray().map(v => v.toFixed(2)).join(',');
+  if (lv.grounded) lastG = lv.ground.cur.x;
+  if (lv.oops !== last) { last = lv.oops; deaths[lastG] = (deaths[lastG] || 0) + 1; }
+}
+document.getElementById('out').textContent = 'RESULT'+` level=${n} won=${won} seconds=${(steps / 60).toFixed(1)} oops=${lv.oops} x=${lv.pos.x.toFixed(1)} y=${lv.pos.y.toFixed(1)} lost=${lost} deaths=${JSON.stringify(deaths)} first=${window.firstDeath} pass=${window.pass}`;
+</script>

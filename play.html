@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Play – Nu, Pogodi! The Grand Chase</title>
+  <meta name="description" content="Play Nu, Pogodi! The Grand Chase – a free fan-made 3D slapstick chase game in your browser.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/game.css">
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <div id="hud" class="hidden">
+    <div id="hud-top">
+      <a class="home" href="index.html" title="Back to website">⌂</a>
+      <div id="hud-title"></div>
+      <div id="hud-info"></div>
+    </div>
+    <div id="bars">
+      <div id="bar-a" class="bar hidden"><span></span><div><i></i></div></div>
+      <div id="bar-b" class="bar hidden"><span></span><div><i></i></div></div>
+    </div>
+    <div id="hint"></div>
+    <div id="toast"></div>
+    <div id="keys-help">Esc: pause • R: restart • M: mute</div>
+  </div>
+
+  <div id="touch">
+    <div class="pad left">
+      <button data-key="KeyW">▲</button>
+      <button data-key="KeyA">◀</button>
+      <button data-key="KeyS">▼</button>
+      <button data-key="KeyD">▶</button>
+    </div>
+    <div class="pad right">
+      <button data-key="KeyE">E</button>
+      <button data-key="Space" class="big">JUMP</button>
+    </div>
+  </div>
+
+  <div id="card-wrap" class="hidden"><div id="card"></div></div>
+  <noscript><p style="color:#fff;padding:2rem">This game needs JavaScript and WebGL.</p></noscript>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

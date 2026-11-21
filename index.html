@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nu, Pogodi! The Grand Chase – a free 3D browser game</title>
+  <meta name="description" content="Nu, Pogodi! The Grand Chase: a free, fan-made 3D slapstick action-platformer. Outwit the Wolf across six locations and reach the New Year's concert on time. Plays in your browser.">
+  <meta property="og:title" content="Nu, Pogodi! The Grand Chase">
+  <meta property="og:description" content="Free fan-made 3D slapstick chase game – play instantly in your browser.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#top">Nu, Pogodi!</a>
+    <nav>
+      <a href="#story">Story</a><a href="#levels">Levels</a><a href="#controls">Controls</a>
+      <a id="gh-link" href="https://github.com/" rel="noopener">GitHub</a>
+      <a class="cta-s" href="play.html">Play</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="burst" aria-hidden="true"></div>
+      <p class="kicker">A fan-made 3D slapstick chase</p>
+      <h1>Nu, Pogodi!<small>The Grand Chase</small></h1>
+      <p class="lead">Be the clever Hare. Outsmart the scheming Wolf across nine levels of balconies, fairgrounds, highways, construction sites, a ski slope — and make it to the New Year's concert on time.</p>
+      <p><a class="cta" href="play.html">▶ Play now</a></p>
+      <p class="fine">Free · runs in your browser · keyboard or touch · about 30–45 minutes</p>
+    </section>
+
+    <section id="story" class="wrap">
+      <h2>The story</h2>
+      <p>It's the last morning of the year. The Hare is watering flowers on his balcony when the Wolf spots him from the street and fires a grappling hook. What follows is the longest, loudest chase of their lives: through an amusement park, down a highway, across a skyscraper in the making, onto a cruise ship, and up to a snowy mountain resort where the whole town is waiting for a New Year's Eve concert.</p>
+      <p>Nu, zayats… <em>pogodi!</em></p>
+    </section>
+
+    <section id="levels" class="wrap">
+      <h2>The route</h2>
+      <div class="grid">
+        <article><span>Prologue</span><h3>Balcony Escape</h3><p>Hop between balconies and dodge the Wolf's swinging hooks.</p></article>
+        <article><span>Chapter 1</span><h3>Trouble at the Fairground</h3><p>Hall of mirrors, shooting gallery, Ferris wheel — find three golden tickets.</p></article>
+        <article class="boss"><span>Boss</span><h3>The Magician's Stage</h3><p>Pull the levers and trap the Wolf in the magic box. Three times.</p></article>
+        <article><span>Chapter 2</span><h3>Highway Mayhem</h3><p>Bicycle vs. motorcycle, sports car and a runaway steamroller.</p></article>
+        <article><span>Chapter 2b</span><h3>Construction Site</h3><p>Cranes, girders and wrecking balls high above the city.</p></article>
+        <article><span>Interlude</span><h3>The Hospital Nightmare</h3><p>Play as the Wolf, fleeing a giant Robot Hare through a surreal museum.</p></article>
+        <article><span>Chapter 3</span><h3>The Sea Cruise</h3><p>The Wolf punched a hole in the hull. Plug leaks, pump water, survive.</p></article>
+        <article class="boss"><span>Final</span><h3>New Year's Showdown</h3><p>Downhill ski chase against Snegurochka (a.k.a. the Wolf). Avalanche!</p></article>
+        <article><span>Finale</span><h3>Happy New Year!</h3><p>Fireworks, a giant tree, and one very tangled Wolf.</p></article>
+      </div>
+    </section>
+
+    <section id="controls" class="wrap">
+      <h2>Controls</h2>
+      <table>
+        <tr><th>Move</th><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrow keys</td></tr>
+        <tr><th>Jump / double jump</th><td><kbd>Space</kbd> (press again in mid-air)</td></tr>
+        <tr><th>Interact / pump / plug</th><td><kbd>E</kbd></td></tr>
+        <tr><th>Rotate camera (platforming)</th><td><kbd>Q</kbd> <kbd>E</kbd></td></tr>
+        <tr><th>Runner levels</th><td><kbd>A</kbd>/<kbd>D</kbd> lanes · <kbd>Space</kbd> jump · <kbd>S</kbd> slide</td></tr>
+        <tr><th>Pause · Restart · Mute</th><td><kbd>Esc</kbd> · <kbd>R</kbd> · <kbd>M</kbd></td></tr>
+      </table>
+      <p class="fine">Touch devices get on-screen buttons automatically.</p>
+      <p><a class="cta" href="play.html">▶ Play now</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nu, Pogodi! The Grand Chase is an unofficial, non-commercial fan tribute. “Nu, pogodi!” and its characters belong to their respective rights holders (Soyuzmultfilm). All 3D models, code and sounds in this project are original and procedurally generated.</p>
+    <p>Built with <a href="https://threejs.org" rel="noopener">three.js</a> · Code released under the MIT licence · <a id="gh-link2" href="https://github.com/" rel="noopener">Source on GitHub</a></p>
+  </footer>
+
+  <script>
+    // Point the GitHub links at the repo this site is served from (github.io/<user>/<repo>/)
+    (function () {
+      var h = location.hostname, m = h.match(/^([^.]+)\.github\.io$/);
+      if (!m) return;
+      var repo = location.pathname.split('/').filter(Boolean)[0];
+      var url = 'https://github.com/' + m[1] + (repo ? '/' + repo : '');
+      ['gh-link', 'gh-link2'].forEach(function (id) { var a = document.getElementById(id); if (a) a.href = url; });
+    })();
+  </script>
+</body>
+</html>
