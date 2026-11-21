@@ -49,3 +49,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1018; fon
   .pad button.on { background: var(--red); }
   #keys-help { display: none; }
 }
+
+#fatal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #1a1018; padding: 20px; text-align: center; }
+#fatal > div { max-width: 560px; background: var(--cream); color: var(--ink); border: 5px solid var(--red); border-radius: 20px; padding: 24px 28px; line-height: 1.5; }
+#fatal h2 { margin: 0 0 10px; font-family: Georgia, serif; font-style: italic; }
+#fatal code { background: #2a1b1418; padding: 1px 6px; border-radius: 4px; }

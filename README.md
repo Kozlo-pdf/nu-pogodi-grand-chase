@@ -20,7 +20,7 @@ You play the clever Hare and outwit the scheming Wolf across nine short levels, 
 `WASD`/arrows move · `Space` jump (double jump in mid-air) · `E` interact/plug/pump · `Q`/`E` rotate camera in platforming levels · runner levels: `A`/`D` lanes, `Space` jump, `S` slide · `Esc` pause · `R` restart · `M` mute. Touch controls appear on touch devices.
 
 ## Run locally
-ES modules need an HTTP server (opening the file directly will not work):
+On Windows just double-click `PLAY.bat`. Otherwise ES modules need an HTTP server (opening the file directly shows a blank page):
 
 ```sh
 python -m http.server 8000

@@ -8,7 +8,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/game.css">
   <script type="importmap">
-    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+    { "imports": { "three": "./vendor/three.module.js" } }
   </script>
 </head>
 <body>
@@ -43,6 +43,19 @@
   </div>
 
   <div id="card-wrap" class="hidden"><div id="card"></div></div>
+  <div id="fatal" class="hidden"><div><h2>The game could not start</h2><p id="fatal-msg"></p></div></div>
+  <script>
+    (function () {
+      var box = document.getElementById('fatal'), msg = document.getElementById('fatal-msg');
+      function show(t) { msg.innerHTML = t; box.classList.remove('hidden'); }
+      if (location.protocol === 'file:') {
+        show('Browsers block game scripts when a page is opened straight from a folder.<br><br><b>Fix:</b> double-click <code>PLAY.bat</code> in the game folder (it starts a tiny local server and opens the game), or play online on the website.');
+        return;
+      }
+      addEventListener('error', function (e) { show('Something went wrong: ' + (e.message || 'script error') + '<br>Try a modern browser (Chrome, Edge, Firefox) with WebGL enabled.'); });
+      setTimeout(function () { if (!window.__game) show('The game is taking too long to load. Check your connection and reload the page.'); }, 8000);
+    })();
+  </script>
   <noscript><p style="color:#fff;padding:2rem">This game needs JavaScript and WebGL.</p></noscript>
 
   <script type="module" src="js/main.js"></script>
