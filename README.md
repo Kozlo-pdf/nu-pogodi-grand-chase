@@ -1,8 +1,8 @@
-# Nu, Pogodi! The Grand Chase
+﻿# Nu, Pogodi! The Grand Chase
 
 A free, fan-made 3D slapstick chase game that runs in the browser (three.js, no build step), with its own website.
 
-You play the clever Hare and outwit the scheming Wolf across fourteen levels (about an hour), from a balcony escape to a New Year's Eve finale.
+You play the clever Hare and outwit the scheming Wolf across fourteen levels (about 30–45 minutes), from a balcony escape to a New Year's Eve finale.
 
 | # | Level | Gameplay |
 |---|-------|----------|
