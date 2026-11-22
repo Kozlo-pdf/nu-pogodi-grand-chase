@@ -2,7 +2,7 @@ import * as THREE from 'three';
 export { THREE };
 
 /* ---------- input ---------- */
-export const input = { down: {}, hit: {} };
+export const input = { down: {}, hit: {}, splitPads: false };
 const PREVENT = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 addEventListener('keydown', (e) => {
   if (PREVENT.has(e.code)) e.preventDefault();
@@ -11,9 +11,42 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('keyup', (e) => { input.down[e.code] = false; });
 addEventListener('blur', () => { input.down = {}; });
-export const isDown = (...c) => c.some((k) => input.down[k]);
-export const wasHit = (...c) => c.some((k) => input.hit[k]);
-export const endFrame = () => { input.hit = {}; };
+export const isDown = (...c) => c.some((k) => input.down[k] || gp.down[k]);
+export const wasHit = (...c) => c.some((k) => input.hit[k] || gp.hit[k]);
+export const endFrame = () => { input.hit = {}; gp.hit = {}; };
+/* ---------- gamepad (PS4 DualShock 4 / any "standard" controller) ---------- */
+const gp = { down: {}, hit: {} };
+const padProfile = { square: 'KeyE', camRight: 'KeyZ', help: '' };
+export const setPadProfile = (p) => Object.assign(padProfile, p);
+export const padHelp = () => padProfile.help;
+export function pollGamepad() {
+  const pads = [...(navigator.getGamepads ? navigator.getGamepads() : [])].filter((p) => p && p.connected);
+  const now = {};
+  const set = (codes, v) => { if (v) codes.forEach((c) => { now[c] = true; }); };
+  pads.forEach((p, idx) => {
+    const split = input.splitPads && pads.length >= 2;
+    const dz = (i) => (Math.abs(p.axes[i] || 0) > 0.35 ? p.axes[i] : 0);
+    const b = (i) => !!(p.buttons[i] && (p.buttons[i].pressed || p.buttons[i].value > 0.5));
+    const lx = dz(0), ly = dz(1), rx = dz(2);
+    const left = lx < 0 || b(14), right = lx > 0 || b(15), up = ly < 0 || b(12), down = ly > 0 || b(13);
+    if (!split || idx === 0) { set(['KeyA'], left); set(['KeyD'], right); set(['KeyW'], up); set(['KeyS'], down); }
+    if (!split || idx === 1) { set(['ArrowLeft'], left); set(['ArrowRight'], right); set(['ArrowUp'], up); set(['ArrowDown'], down); }
+    if (split && idx > 0) return;
+    set(['PadUp'], up); set(['PadDown'], down);
+    set(['Space', 'Enter', 'PadA'], b(0));      // cross: jump / confirm
+    set([padProfile.square], b(2));             // square: interact
+    set(['Tab'], b(3));                         // triangle: swap characters
+    set(['KeyF'], b(1));                        // circle: grapple
+    set(['KeyC'], b(5));                        // R1: disguise
+    set(['ShiftLeft'], b(4));                   // L1: sneak
+    set(['KeyQ'], rx < 0 || b(6));              // L2 / right stick: camera
+    set([padProfile.camRight], rx > 0 || b(7));
+    set(['Escape'], b(9)); set(['KeyR'], b(8)); set(['KeyM'], b(10)); // options / share / L3
+  });
+  for (const k of Object.keys(now)) if (!gp.down[k]) gp.hit[k] = true;
+  gp.down = now;
+}
+
 
 // on-screen touch buttons (data-key = KeyboardEvent.code)
 export function bindTouch() {

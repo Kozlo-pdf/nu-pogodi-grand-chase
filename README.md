@@ -24,6 +24,9 @@ You play the clever Hare and outwit the scheming Wolf across fourteen levels (ab
 ## Controls
 `WASD`/arrows move · `Space` jump (double jump in mid-air) · `E` interact/plug/pump · `Q`/`E` rotate camera in platforming levels · runner levels: `A`/`D` lanes, `Space` jump, `S` slide · `Esc` pause · `R` restart · `M` mute. Touch controls appear on touch devices.
 
+## Controller (PS4 / Xbox)
+Plug in or pair a pad and press any button. Stick/D-pad = move or change lane, **✕** jump, **□** action, **R-stick** camera, **Options** pause, **Share** restart, menus with D-pad + ✕. Rumble on hits.
+
 ## Run locally
 On Windows just double-click `PLAY.bat`. Otherwise ES modules need an HTTP server (opening the file directly shows a blank page):
 

@@ -27,18 +27,26 @@ function tone(freq, dur, type = 'square', vol = 0.05, slide = 0, delay = 0) {
   o.start(t); o.stop(t + dur + 0.03);
 }
 
+export function rumble(ms = 140, strong = 0.8, weak = 0.5) {
+  try {
+    for (const g of navigator.getGamepads ? navigator.getGamepads() : []) {
+      if (g && g.vibrationActuator && g.vibrationActuator.playEffect) g.vibrationActuator.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak });
+    }
+  } catch (e) { /* no haptics */ }
+}
+
 export const sfx = {
   jump: () => tone(300, 0.16, 'square', 0.045, 450),
   air: () => tone(480, 0.14, 'square', 0.04, 500),
   coin: () => { tone(880, 0.08, 'square', 0.04); tone(1320, 0.14, 'square', 0.04, 0, 0.07); },
-  hit: () => tone(180, 0.35, 'sawtooth', 0.07, -120),
+  hit: () => { tone(180, 0.35, 'sawtooth', 0.07, -120); rumble(180, 0.9, 0.5); },
   pull: () => tone(220, 0.12, 'triangle', 0.08, 200),
   trap: () => { [440, 330, 220, 110].forEach((f, i) => tone(f, 0.16, 'square', 0.06, 0, i * 0.09)); },
   plug: () => tone(150, 0.1, 'triangle', 0.08, 120),
   pump: () => tone(110, 0.08, 'sine', 0.07, 40),
   win: () => { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.22, 'square', 0.05, 0, i * 0.12)); },
   lose: () => { [392, 330, 262, 196].forEach((f, i) => tone(f, 0.22, 'sawtooth', 0.05, 0, i * 0.14)); },
-  boom: () => tone(90, 0.6, 'sawtooth', 0.09, -60),
+  boom: () => { tone(90, 0.6, 'sawtooth', 0.09, -60); rumble(320, 1, 0.8); },
   pop: () => tone(700, 0.1, 'sine', 0.06, -400),
 };
 

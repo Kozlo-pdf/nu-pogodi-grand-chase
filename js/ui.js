@@ -54,4 +54,10 @@ export const ui = {
   hideCard() { $('card-wrap').classList.add('hidden'); cardOpen = false; primary = null; },
   get cardOpen() { return cardOpen; },
   clickPrimary() { if (primary) primary.click(); },
+  enter() { const ae = document.activeElement; if (!ae || ae === document.body || ae === primary || !ae.closest || !ae.closest('#card')) { if (primary) primary.click(); } },
+  clickFocused() { const ae = document.activeElement; if (ae && ae.closest && ae.closest('#card') && ae.tagName === 'BUTTON') ae.click(); else if (primary) primary.click(); },
+  moveFocus(d) {
+    const bs = [...document.querySelectorAll('#card button')]; if (!bs.length) return;
+    let i = bs.indexOf(document.activeElement); i = i < 0 ? 0 : (i + d + bs.length) % bs.length; bs[i].focus({ preventScroll: true });
+  },
 };

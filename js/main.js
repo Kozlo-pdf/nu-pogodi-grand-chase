@@ -1,8 +1,9 @@
-import { THREE, wasHit, endFrame, bindTouch, disposeScene, makeHare, makeWolf } from './common.js';
+import { THREE, wasHit, endFrame, bindTouch, disposeScene, makeHare, makeWolf, pollGamepad, setPadProfile, padHelp } from './common.js';
 import { LEVELS } from './levels.js';
 import { ui } from './ui.js';
 import { sfx, unlockAudio, startMusic, toggleMute } from './audio.js';
 
+setPadProfile({ square: 'KeyF', camRight: 'KeyE', help: '🎮 ✕ jump · □ action · ← → ↑ ↓ move/lane · R-stick camera · Options pause · Share restart' });
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -143,10 +144,14 @@ const clock = new THREE.Clock();
 function frame() {
   requestAnimationFrame(frame);
   const dt = clock.getDelta();
+  pollGamepad();
 
   if (wasHit('KeyM')) { const m = toggleMute(); ui.toast(m ? 'Sound off' : 'Sound on', 900); }
   if (ui.cardOpen) {
-    if (wasHit('Enter')) ui.clickPrimary();
+    if (wasHit('PadUp', 'ArrowUp')) ui.moveFocus(-1);
+    else if (wasHit('PadDown', 'ArrowDown')) ui.moveFocus(1);
+    else if (wasHit('PadA')) ui.clickFocused();
+    else if (wasHit('Enter')) ui.enter();
     else if (paused && wasHit('Escape', 'KeyP')) ui.clickPrimary();
   } else if (running) {
     if (wasHit('Escape', 'KeyP')) pauseGame();
@@ -178,3 +183,9 @@ if (params.has('level')) {
 // expose for debugging / automated tests
 window.__game = { get level() { return level; }, get running() { return running; }, begin, ctx };
 frame();
+
+/* ---------- controller hint ---------- */
+addEventListener('gamepadconnected', (e) => {
+  ui.toast('🎮 Controller connected: ' + e.gamepad.id.split('(')[0].trim(), 3000);
+  const k = document.getElementById('keys-help'); if (k) { k.textContent = padHelp(); k.style.opacity = 0.9; }
+});
