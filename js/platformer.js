@@ -60,11 +60,11 @@ export class Platformer {
 
   addPlatform(d) {
     const w = d.w, h = d.h ?? 0.5, dp = d.d ?? 4;
-    const color = d.color ?? (d.move ? (this.cfg.moverColor ?? 0xe0b030) : (this.cfg.platformColor ?? 0x8a6d4b));
+    const color = d.crumble ? (this.cfg.crumbleColor ?? 0xcdb98f) : d.bounce ? 0xff5f8a : d.color ?? (d.move ? (this.cfg.moverColor ?? 0xe0b030) : (this.cfg.platformColor ?? 0x8a6d4b));
     const m = box(w, h, dp, color);
     this.scene.add(m);
     const pl = {
-      mesh: m, w, h, d: dp, move: d.move, cp: !!d.cp, cpDone: false,
+      mesh: m, w, h, d: dp, move: d.move, cp: !!d.cp, cpDone: false, crumble: !!d.crumble, bounce: d.bounce || 0, offY: 0, solid: true, state: 0, ct: 0,
       base: new THREE.Vector3(d.x, d.y, d.z ?? 0), cur: new THREE.Vector3(), delta: new THREE.Vector3(),
     };
     pl.cur.copy(pl.base);
@@ -75,11 +75,12 @@ export class Platformer {
   placePlatform(pl, t, init) {
     const prev = pl.cur.clone();
     pl.cur.copy(pl.base);
+    pl.cur.y += pl.offY;
     if (pl.move) {
       pl.cur[pl.move.axis] += Math.sin(t * pl.move.speed + (pl.move.phase || 0)) * pl.move.range;
     }
     if (init) pl.delta.set(0, 0, 0); else pl.delta.copy(pl.cur).sub(prev);
-    pl.mesh.position.set(pl.cur.x, pl.cur.y - pl.h / 2, pl.cur.z);
+    pl.mesh.position.set(pl.cur.x + (pl.state === 1 ? (Math.random() - 0.5) * 0.14 : 0), pl.cur.y - pl.h / 2, pl.cur.z);
     pl.minx = pl.cur.x - pl.w / 2; pl.maxx = pl.cur.x + pl.w / 2;
     pl.minz = pl.cur.z - pl.d / 2; pl.maxz = pl.cur.z + pl.d / 2;
     pl.maxy = pl.cur.y; pl.miny = pl.cur.y - pl.h;
@@ -149,7 +150,7 @@ export class Platformer {
     this.invuln = Math.max(0, this.invuln - dt);
     this.msgT = Math.max(0, this.msgT - dt);
 
-    for (const pl of this.platforms) this.placePlatform(pl, t, false);
+    for (const pl of this.platforms) { this.stepCrumble(pl, dt); this.placePlatform(pl, t, false); }
     this.updateHazards(t);
     if (this.tick) this.tick(t, this);
 
@@ -192,6 +193,16 @@ export class Platformer {
     followSun(this.sun, this.pos);
   }
 
+  stepCrumble(pl, dt) {
+    if (!pl.crumble) return;
+    if (pl.state === 0) { if (this.ground === pl) { pl.state = 1; pl.ct = 0; } }
+    else if (pl.state === 1) { pl.ct += dt; if (pl.ct > 0.7) { pl.state = 2; pl.ct = 0; pl.solid = false; sfx.pop(); } }
+    else {
+      pl.ct += dt; pl.offY -= 14 * dt;
+      if (pl.ct > 3) { pl.state = 0; pl.offY = 0; pl.solid = true; }
+    }
+  }
+
   movePlayer(dt) {
     // camera rotation
     if (isDown('KeyQ')) this.camYaw += 1.7 * dt;
@@ -204,7 +215,7 @@ export class Platformer {
     let dx = c * ix + s * iz, dz = -s * ix + c * iz;
     const len = Math.hypot(dx, dz);
     if (len > 0) { dx /= len; dz /= len; }
-    const k = damp(this.grounded ? 20 : 7, dt);
+    const k = damp(this.grounded ? (this.cfg.ice ? 2.4 : 20) : 7, dt);
     this.vel.x += (dx * SPEED - this.vel.x) * k;
     this.vel.z += (dz * SPEED - this.vel.z) * k;
     this.moving = len > 0;
@@ -234,10 +245,13 @@ export class Platformer {
     const wasGround = this.grounded;
     this.grounded = false; this.ground = null;
     for (const pl of this.platforms) {
+      if (!pl.solid) continue;
       if (Math.abs(this.pos.x - pl.cur.x) >= pl.w / 2 + R * 0.8 || Math.abs(this.pos.z - pl.cur.z) >= pl.d / 2 + R * 0.8) continue;
       if (!(this.pos.y < pl.maxy && this.pos.y + H > pl.miny)) continue;
       if (this.vel.y <= 0 && prevY >= pl.maxy - 0.4) {
-        this.pos.y = pl.maxy; this.vel.y = 0; this.grounded = true; this.ground = pl;
+        this.pos.y = pl.maxy;
+        if (pl.bounce) { this.vel.y = pl.bounce; this.jumps = 1; sfx.air(); }
+        else { this.vel.y = 0; this.grounded = true; this.ground = pl; }
       } else if (this.vel.y > 0 && prevY + H <= pl.miny + 0.4) {
         this.pos.y = pl.miny - H; this.vel.y = 0;
       }
@@ -262,6 +276,7 @@ export class Platformer {
 
   resolveH(axis) {
     for (const pl of this.platforms) {
+      if (!pl.solid) continue;
       if (!(this.pos.y < pl.maxy - 0.12 && this.pos.y + H > pl.miny + 0.12)) continue;
       const ox = Math.abs(this.pos.x - pl.cur.x) < pl.w / 2 + R - 0.004;
       const oz = Math.abs(this.pos.z - pl.cur.z) < pl.d / 2 + R - 0.004;

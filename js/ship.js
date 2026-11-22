@@ -67,7 +67,7 @@ export class Ship {
     this.face = 0; this.wface = 0;
 
     this.time = 0; this.dur = cfg.duration ?? 55;
-    this.waterLvl = 0.12; this.wTarget = null; this.wWait = 3; this.punch = 0; this.interval = 6.2;
+    this.waterLvl = 0.12; this.wTarget = null; this.wWait = 3; this.punch = 0; this.interval = cfg.interval ?? 6.2;
     this.t = 0; this.phase = 0; this.over = false;
     this.pumping = false; this.working = null;
     ui.toast('The Wolf is punching holes! Plug leaks and pump out the water until the ship docks!', 5000);

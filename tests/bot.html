@@ -11,7 +11,7 @@ let won = false, lost = '';
 const ctx = { camera: new THREE.PerspectiveCamera(), win() { won = true; }, lose(m) { lost = m; } };
 const lv = LEVELS[n].make(ctx);
 if (new URLSearchParams(location.search).has('nohaz')) lv.hazards = [];
-const q = new URLSearchParams(location.search); if (q.has('sx')) { lv.pos.set(+q.get('sx'), 0.1, 0); lv.got = 3; }
+const q = new URLSearchParams(location.search); if (q.has('sx')) { lv.pos.set(+q.get('sx'), 0.1, 0); lv.got = 99; }
 const deaths = {}; let lastG = 0;
 const dt = 1 / 60; let steps = 0, last = 0;
 const press = (k) => { input.hit[k] = true; input.down[k] = true; };

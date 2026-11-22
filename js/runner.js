@@ -24,6 +24,7 @@ export class Runner {
     const zLen = L + 320, zMid = (40 - (L + 280)) / 2;
     const ground = box(LW * 3 + 1.6, 1, zLen, cfg.ground); ground.position.set(0, -0.5, zMid); ground.castShadow = false; W.add(ground);
     const side = box(260, 1, zLen, cfg.side); side.position.set(0, -0.62, zMid); side.castShadow = false; W.add(side);
+    if (cfg.ceiling) { const ce = box(120, 1, zLen, cfg.ceiling); ce.position.set(0, 10.5, zMid); ce.castShadow = false; W.add(ce); }
     for (const x of [-LW / 2, LW / 2]) {
       const line = box(0.1, 0.05, zLen, cfg.line ?? 0xffffff); line.position.set(x, 0.02, zMid); line.castShadow = false; W.add(line);
     }
@@ -132,6 +133,13 @@ export class Runner {
       g.add(body, cab, roller, pipe); c.wheels = [roller];
       for (const sx of [-1, 1]) { const w = makeWheel(1.1); w.position.set(sx * 1.4, 0, 1.4); g.add(w); c.wheels.push(w); }
       wolfOn(2.1, 1.1, 0.9);
+    } else if (kind === 'train') {
+      const body = box(3.4, 3.2, 9, 0x2a64b8); body.position.set(0, 1.9, 2);
+      const stripe = box(3.45, 0.5, 9.05, 0xffffff); stripe.position.set(0, 1.5, 2);
+      const win = box(3.5, 0.9, 7, 0x9fdcff); win.position.set(0, 2.5, 2.3);
+      g.add(body, stripe, win);
+      for (const sx of [-1, 1]) { const l = sph(0.28, mat(0xffffcc, 0xffffaa), 8); l.position.set(sx * 1.0, 1.3, -2.55); g.add(l); }
+      wolfOn(3.5, 0.5, 0.9);
     } else if (kind === 'robot') {
       const r = makeRobotHare(); r.scale.setScalar(2.6); r.rotation.y = Math.PI; g.add(r); c.anim = r;
     } else if (kind === 'wolfdress') {

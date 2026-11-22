@@ -19,7 +19,7 @@ addEventListener('resize', resize); resize();
 bindTouch();
 
 /* ---------- progress ---------- */
-const KEY = 'nupogodi.progress.v1';
+const KEY = 'nupogodi.progress.v2';
 const loadProgress = () => { try { return Math.min(LEVELS.length - 1, parseInt(localStorage.getItem(KEY) || '0', 10) || 0); } catch (e) { return 0; } };
 const saveProgress = (n) => { try { if (n > loadProgress()) localStorage.setItem(KEY, String(n)); } catch (e) { /* ignore */ } };
 

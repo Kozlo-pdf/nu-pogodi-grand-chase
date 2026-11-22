@@ -11,6 +11,8 @@ const RADIUS = 13;
 export class Arena {
   constructor(ctx, cfg) {
     this.ctx = ctx; this.cfg = cfg;
+    const col = { stage: 0x9c3a3a, c1: 0x8e1b2e, c2: 0xb1253a, ...cfg.colors };
+    this.need = cfg.need ?? 3; this.speedBase = cfg.speed ?? 5.1; this.openT = cfg.open ?? 6;
     const scene = this.scene = new THREE.Scene();
     scene.background = new THREE.Color(0x2a1030);
     scene.fog = new THREE.Fog(0x2a1030, 40, 110);
@@ -18,12 +20,12 @@ export class Arena {
     followSun(this.sun, new THREE.Vector3());
 
     // stage
-    const stage = cyl(RADIUS + 1, RADIUS + 1.4, 1, 0x9c3a3a, 40); stage.position.y = -0.5; scene.add(stage);
+    const stage = cyl(RADIUS + 1, RADIUS + 1.4, 1, col.stage, 40); stage.position.y = -0.5; scene.add(stage);
     const ring = mesh(new THREE.TorusGeometry(RADIUS + 1, 0.25, 8, 48), mat(0xffd34d, 0x664400)); ring.rotation.x = Math.PI / 2; scene.add(ring);
     const floor = cyl(RADIUS * 3, RADIUS * 3, 1, 0x1c0b22, 8); floor.position.y = -1.6; scene.add(floor);
     // curtains
     for (let i = -3; i <= 3; i++) {
-      const c = box(4.4, 16, 0.6, i % 2 ? 0x8e1b2e : 0xb1253a);
+      const c = box(4.4, 16, 0.6, i % 2 ? col.c1 : col.c2);
       c.position.set(i * 4.6, 7, -17); scene.add(c);
     }
     const top = box(34, 2, 1, 0xffd34d); top.position.set(0, 15.2, -16.4); scene.add(top);
@@ -43,7 +45,7 @@ export class Arena {
     this.padOpen = 0;
 
     // levers
-    this.levers = [[-8.5, 3], [8.5, 3], [0, -9]].map(([x, z]) => {
+    this.levers = (cfg.levers ?? [[-8.5, 3], [8.5, 3], [0, -9]]).map(([x, z]) => {
       const g = new THREE.Group();
       g.add(box(1.2, 0.5, 1.2, 0x444444));
       const stick = new THREE.Group();
@@ -68,7 +70,7 @@ export class Arena {
   }
 
   updateHud() {
-    ui.info(`${'❤️'.repeat(this.lives)}${'🖤'.repeat(3 - this.lives)} &nbsp; Wolf trapped <b>${this.traps}/3</b>`);
+    ui.info(`${'❤️'.repeat(this.lives)}${'🖤'.repeat(3 - this.lives)} &nbsp; Wolf trapped <b>${this.traps}/${this.need}</b>`);
   }
 
   update(dt) {
@@ -98,7 +100,7 @@ export class Arena {
     }
     ui.hint(near ? 'Press E to pull the lever!' : null);
     if (near && wasHit('KeyE', 'KeyF', 'Enter')) {
-      near.cd = 9; this.padOpen = 6; sfx.pull();
+      near.cd = 9; this.padOpen = this.openT; sfx.pull();
       ui.toast('✨ The magic box opens! Lure the Wolf over the pad!', 2200);
     }
 
@@ -113,7 +115,7 @@ export class Arena {
       if (this.stun <= 0) {
         const dx = this.pos.x - this.wpos.x, dz = this.pos.z - this.wpos.z;
         const d = Math.hypot(dx, dz) || 1;
-        const ws = 5.1 + this.traps * 0.5;
+        const ws = this.speedBase + this.traps * 0.45;
         this.wpos.x += (dx / d) * ws * dt; this.wpos.z += (dz / d) * ws * dt;
         this.wface = lerpAngle(this.wface, Math.atan2(dx, dz), damp(12, dt));
         animateLimbs(this.wolf, t * 11, 0.9);
@@ -134,7 +136,7 @@ export class Arena {
       this.boxMesh.rotation.x += dt * 5;
       if (this.st > 1.6) {
         this.boxMesh.visible = false; this.wolf.visible = true; this.boxMesh.rotation.set(0, 0, 0);
-        if (this.traps >= 3) { this.state = 'done'; this.ctx.win(); }
+        if (this.traps >= this.need) { this.state = 'done'; this.ctx.win(); }
         else {
           this.state = 'chase'; this.stun = 2;
           const a = Math.random() * Math.PI * 2;
@@ -171,6 +173,6 @@ export class Arena {
     this.boxMesh.visible = true; this.wolf.visible = false;
     this.boxMesh.position.set(0, 1.3, 0);
     sfx.trap(); this.updateHud();
-    ui.toast(this.traps >= 3 ? '🎩 Final trick! Nu, pogodi!' : `🎩 Trapped in the box! ${this.traps}/3`, 2200);
+    ui.toast(this.traps >= this.need ? '🎩 Final trick! Nu, pogodi!' : `🎩 Trapped in the box! ${this.traps}/${this.need}`, 2200);
   }
 }
