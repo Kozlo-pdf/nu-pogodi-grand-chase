@@ -86,71 +86,117 @@ export function followSun(d, p) {
 }
 
 /* ---------- characters (all face +z locally, feet at y=0) ---------- */
-function limb(len, r, color, y, x) {
+// Limb group pivoting at its top. Optional hand/foot, and a flared (bell-bottom) leg.
+function limb(len, r, color, y, x, o = {}) {
   const g = new THREE.Group();
-  const m = mesh(new THREE.CapsuleGeometry(r, len, 4, 8), color);
-  m.position.y = -len / 2 - r * 0.3;
-  g.add(m); g.position.set(x, y, 0);
+  if (o.flare) {
+    const m = mesh(new THREE.CylinderGeometry(r, r * o.flare, len + r, 10), color);
+    m.position.y = -(len + r) / 2; g.add(m);
+  } else {
+    const m = mesh(new THREE.CapsuleGeometry(r, len, 4, 10), color);
+    m.position.y = -len / 2 - r * 0.3; g.add(m);
+  }
+  const bottom = -(len + r * 1.2);
+  if (o.hand) { const h = sph(o.handR ?? r * 1.25, o.hand, 10); h.position.y = bottom - 0.02; g.add(h); }
+  if (o.foot) {
+    const f = sph(o.footR ?? r * 1.35, o.foot, 10); f.scale.set(1, 0.6, 1.6); f.position.set(0, bottom + 0.02, 0.08); g.add(f);
+  }
+  g.position.set(x, y, 0);
   return g;
 }
 
 export function makeHare(p = {}) {
   const { fur = 0x9fa8b5, white = 0xf3f3f7, shirt = 0xe9772e, pants = 0x3a4a6b, pupil = 0x111111 } = p;
   const g = new THREE.Group();
-  const torso = mesh(new THREE.CapsuleGeometry(0.3, 0.45, 4, 10), shirt);
-  torso.position.y = 1.0; g.add(torso);
-  const head = sph(0.33, fur); head.position.set(0, 1.66, 0.02); g.add(head);
-  const snout = sph(0.17, white); snout.position.set(0, 1.58, 0.27); g.add(snout);
-  const nose = sph(0.05, 0xff6f91, 8); nose.position.set(0, 1.63, 0.43); g.add(nose);
+  const torso = mesh(new THREE.CapsuleGeometry(0.31, 0.42, 6, 12), shirt); torso.position.y = 1.0; g.add(torso);
+  const collar = mesh(new THREE.TorusGeometry(0.22, 0.05, 6, 14), white); collar.rotation.x = Math.PI / 2; collar.position.y = 1.34; g.add(collar);
+  for (let i = 0; i < 3; i++) { const b = sph(0.035, 0xffffff, 6); b.position.set(0, 1.2 - i * 0.16, 0.3); g.add(b); }
+  const belt = cyl(0.32, 0.32, 0.07, 0x3a2a1a, 14); belt.position.y = 0.76; g.add(belt);
+
+  const head = new THREE.Group(); head.position.set(0, 1.66, 0.02); g.add(head);
+  const skull = sph(0.34, fur, 16); skull.scale.set(1.05, 0.96, 1); head.add(skull);
   for (const s of [-1, 1]) {
-    const eye = sph(0.09, 0xffffff, 10); eye.position.set(s * 0.14, 1.75, 0.25); g.add(eye);
-    const pu = sph(0.045, pupil, 8); pu.position.set(s * 0.14, 1.75, 0.33); g.add(pu);
-    const ear = mesh(new THREE.CapsuleGeometry(0.08, 0.55, 4, 8), fur);
-    ear.position.set(s * 0.17, 2.25, -0.02); ear.rotation.z = -s * 0.22; g.add(ear);
-    const inner = mesh(new THREE.CapsuleGeometry(0.035, 0.4, 4, 6), 0xffb3c7);
-    inner.position.set(s * 0.17, 2.25, 0.05); inner.rotation.z = -s * 0.22; g.add(inner);
+    const cheek = sph(0.15, white, 10); cheek.position.set(s * 0.15, -0.1, 0.22); head.add(cheek);
+    const eye = sph(0.1, 0xffffff, 12); eye.position.set(s * 0.14, 0.1, 0.25); head.add(eye);
+    const pu = sph(0.052, pupil, 8); pu.position.set(s * 0.14, 0.1, 0.34); head.add(pu);
+    const glint = sph(0.02, 0xffffff, 5); glint.position.set(s * 0.14 + 0.02, 0.13, 0.385); head.add(glint);
+    const brow = box(0.14, 0.03, 0.03, 0x555d69); brow.position.set(s * 0.14, 0.23, 0.28); brow.rotation.z = -s * 0.25; head.add(brow);
+    for (let k = -1; k <= 1; k++) {
+      const w = cyl(0.008, 0.008, 0.32, 0x333333, 4); w.rotation.z = Math.PI / 2 + k * 0.18 * s; w.position.set(s * 0.3, -0.1 + k * 0.045, 0.36); head.add(w);
+    }
+    const ear = mesh(new THREE.CapsuleGeometry(0.085, 0.58, 4, 10), fur); ear.position.set(s * 0.17, 0.62, -0.02); ear.rotation.z = -s * 0.2; ear.rotation.x = -0.08; head.add(ear);
+    const inner = mesh(new THREE.CapsuleGeometry(0.04, 0.42, 4, 8), 0xffb3c7); inner.position.set(s * 0.17, 0.62, 0.05); inner.rotation.z = -s * 0.2; inner.rotation.x = -0.08; head.add(inner);
   }
-  const tail = sph(0.15, white, 10); tail.position.set(0, 0.8, -0.34); g.add(tail);
-  const legL = limb(0.35, 0.11, pants, 0.78, -0.15), legR = limb(0.35, 0.11, pants, 0.78, 0.15);
-  const armL = limb(0.38, 0.08, fur, 1.3, -0.38), armR = limb(0.38, 0.08, fur, 1.3, 0.38);
+  const muzzle = sph(0.17, white, 12); muzzle.position.set(0, -0.08, 0.28); head.add(muzzle);
+  const nose = sph(0.055, 0xff6f91, 8); nose.position.set(0, -0.02, 0.44); head.add(nose);
+  const mouth = box(0.1, 0.02, 0.03, 0x663344); mouth.position.set(0, -0.16, 0.43); head.add(mouth);
+  for (const s of [-1, 1]) { const t = box(0.045, 0.07, 0.03, 0xffffff); t.position.set(s * 0.028, -0.2, 0.42); head.add(t); }
+
+  const tail = sph(0.16, white, 12); tail.position.set(0, 0.82, -0.34); g.add(tail);
+  const tail2 = sph(0.09, white, 8); tail2.position.set(0, 0.92, -0.42); g.add(tail2);
+  const legL = limb(0.6, 0.1, pants, 0.78, -0.15, { foot: 0x5a3a28 }), legR = limb(0.6, 0.1, pants, 0.78, 0.15, { foot: 0x5a3a28 });
+  const armL = limb(0.38, 0.075, fur, 1.28, -0.38, { hand: white }), armR = limb(0.38, 0.075, fur, 1.28, 0.38, { hand: white });
   g.add(legL, legR, armL, armR);
-  g.userData = { legL, legR, armL, armR };
+  g.userData = { legL, legR, armL, armR, head };
   return g;
 }
 
 export function makeRobotHare() {
   const g = makeHare({ fur: 0x8f9ba8, white: 0xc9d2da, shirt: 0x5c6670, pants: 0x444c55, pupil: 0xff2a2a });
   const gl = sph(0.1, mat(0xff2a2a, 0xaa0000), 8); gl.position.set(0, 1.8, 0.3); g.add(gl);
+  const ant = cyl(0.015, 0.015, 0.4, 0x333333, 4); ant.position.set(0.1, 2.5, 0); g.add(ant);
+  const bulb = sph(0.05, mat(0xff2a2a, 0xff0000), 6); bulb.position.set(0.1, 2.72, 0); g.add(bulb);
+  for (const s of [-1, 1]) { const bolt = sph(0.045, 0x222222, 6); bolt.position.set(s * 0.33, 1.66, 0.02); g.add(bolt); }
   return g;
 }
 
 export function makeWolf({ dress = false, scale = 1 } = {}) {
-  const fur = 0x5a647c, shirt = dress ? 0x7ec8ff : 0x2e78c7, pants = 0x8a3b2b;
+  const fur = 0x5a647c, furLight = 0x7a859c, shirt = dress ? 0x7ec8ff : 0xf08aa8, pants = 0x8a3b2b;
   const g = new THREE.Group();
-  const torso = mesh(new THREE.CapsuleGeometry(0.36, 0.5, 4, 10), shirt);
-  torso.position.y = 1.08; g.add(torso);
-  const head = sph(0.37, fur); head.position.set(0, 1.8, 0.02); g.add(head);
-  const snout = cone(0.2, 0.55, 0x7a859c, 10); snout.rotation.x = Math.PI / 2; snout.position.set(0, 1.7, 0.45); g.add(snout);
-  const nose = sph(0.06, 0x111111, 8); nose.position.set(0, 1.72, 0.74); g.add(nose);
-  for (const s of [-1, 1]) {
-    const eye = sph(0.09, 0xffe36b, 10); eye.position.set(s * 0.15, 1.88, 0.27); g.add(eye);
-    const pu = sph(0.04, 0x111111, 8); pu.position.set(s * 0.15, 1.88, 0.35); g.add(pu);
-    const ear = cone(0.12, 0.4, fur, 8); ear.position.set(s * 0.22, 2.28, -0.02); ear.rotation.z = -s * 0.25; g.add(ear);
+  const torso = mesh(new THREE.CapsuleGeometry(0.37, 0.46, 6, 12), shirt); torso.position.y = 1.06; g.add(torso);
+  if (!dress) {
+    const col = box(0.5, 0.06, 0.2, 0xffd1de); col.position.set(0, 1.5, 0.28); g.add(col);
+    for (const s of [-1, 1]) { const c = cone(0.14, 0.3, 0xffd1de, 4); c.position.set(s * 0.18, 1.45, 0.3); c.rotation.z = -s * 1.2; g.add(c); }
+    const belt = cyl(0.38, 0.38, 0.08, 0x2a1a12, 14); belt.position.y = 0.76; g.add(belt);
+    const chest = sph(0.2, furLight, 8); chest.position.set(0, 1.42, 0.3); chest.scale.set(1, 0.8, 0.5); g.add(chest);
   }
-  const tail = cone(0.14, 0.7, fur, 8); tail.rotation.x = -2.1; tail.position.set(0, 0.8, -0.5); g.add(tail);
-  const legL = limb(0.38, 0.13, dress ? fur : pants, 0.8, -0.17), legR = limb(0.38, 0.13, dress ? fur : pants, 0.8, 0.17);
-  const armL = limb(0.4, 0.1, fur, 1.38, -0.46), armR = limb(0.4, 0.1, fur, 1.38, 0.46);
+
+  const head = new THREE.Group(); head.position.set(0, 1.8, 0.02); g.add(head);
+  const skull = sph(0.38, fur, 16); skull.scale.set(1.03, 0.97, 1); head.add(skull);
+  const snout = cone(0.21, 0.6, furLight, 12); snout.rotation.x = Math.PI / 2; snout.position.set(0, -0.1, 0.45); head.add(snout);
+  const nose = sph(0.065, 0x111111, 8); nose.position.set(0, -0.04, 0.76); head.add(nose);
+  const jaw = box(0.3, 0.07, 0.4, 0x4a5368); jaw.position.set(0, -0.2, 0.42); head.add(jaw);
+  for (const s of [-1, 1]) {
+    const fang = cone(0.03, 0.1, 0xffffff, 4); fang.rotation.x = Math.PI; fang.position.set(s * 0.1, -0.2, 0.55); head.add(fang);
+    const eye = sph(0.1, 0xffe36b, 12); eye.position.set(s * 0.16, 0.1, 0.28); head.add(eye);
+    const pu = sph(0.045, 0x111111, 8); pu.position.set(s * 0.16, 0.1, 0.37); head.add(pu);
+    const brow = box(0.2, 0.05, 0.06, 0x2a3040); brow.position.set(s * 0.16, 0.22, 0.3); brow.rotation.z = s * 0.35; head.add(brow);
+    const ear = cone(0.13, 0.46, fur, 8); ear.position.set(s * 0.24, 0.45, -0.02); ear.rotation.z = -s * 0.25; head.add(ear);
+    const earIn = cone(0.07, 0.3, 0xffb3c7, 6); earIn.position.set(s * 0.24, 0.43, 0.03); earIn.rotation.z = -s * 0.25; head.add(earIn);
+    const tuft = cone(0.09, 0.22, furLight, 5); tuft.position.set(s * 0.36, -0.05, 0.05); tuft.rotation.z = -s * 1.4; head.add(tuft);
+  }
+  for (let i = -1; i <= 1; i++) { const h = cone(0.08, 0.28, 0x3a4256, 5); h.position.set(i * 0.12, 0.36, 0.1); h.rotation.x = -0.5; head.add(h); }
+  if (!dress) { // the famous cigarette
+    const cig = cyl(0.022, 0.022, 0.34, 0xffffff, 6); cig.rotation.x = Math.PI / 2; cig.rotation.z = 0.15; cig.position.set(0.1, -0.2, 0.62); head.add(cig);
+    const tip = sph(0.03, mat(0xff7a1a, 0xff4400), 6); tip.position.set(0.13, -0.2, 0.79); head.add(tip);
+  }
+
+  const tail = cone(0.16, 0.8, fur, 10); tail.rotation.x = -2.1; tail.position.set(0, 0.78, -0.52); g.add(tail);
+  const legL = limb(0.62, 0.13, dress ? fur : pants, 0.82, -0.18, { flare: dress ? undefined : 1.7, foot: 0x2a1a12 });
+  const legR = limb(0.62, 0.13, dress ? fur : pants, 0.82, 0.18, { flare: dress ? undefined : 1.7, foot: 0x2a1a12 });
+  const armL = limb(0.4, 0.1, dress ? fur : shirt, 1.36, -0.47, { hand: fur, handR: 0.14 }), armR = limb(0.4, 0.1, dress ? fur : shirt, 1.36, 0.47, { hand: fur, handR: 0.14 });
   g.add(legL, legR, armL, armR);
   if (dress) {
-    const skirt = cone(0.62, 0.85, 0x7ec8ff, 14); skirt.position.y = 0.85; g.add(skirt);
-    const trim = cyl(0.63, 0.63, 0.1, 0xffffff, 14); trim.position.y = 0.45; g.add(trim);
-    const hat = cyl(0.3, 0.36, 0.38, 0xe23a3a, 12); hat.position.set(0, 2.38, 0); g.add(hat);
+    const skirt = cone(0.64, 0.86, 0x7ec8ff, 16); skirt.position.y = 0.88; g.add(skirt);
+    const trim = cyl(0.65, 0.65, 0.1, 0xffffff, 16); trim.position.y = 0.46; g.add(trim);
+    const hat = cyl(0.3, 0.37, 0.38, 0xe23a3a, 12); hat.position.set(0, 2.4, 0); g.add(hat);
+    const gem = sph(0.06, mat(0xffd23f, 0x886600), 6); gem.position.set(0, 2.4, 0.36); g.add(gem);
     for (const s of [-1, 1]) {
       const braid = mesh(new THREE.CapsuleGeometry(0.07, 0.9, 4, 6), 0xd9b26f);
       braid.position.set(s * 0.3, 1.7, -0.1); g.add(braid);
     }
   }
-  g.userData = { legL, legR, armL, armR };
+  g.userData = { legL, legR, armL, armR, head };
   g.scale.setScalar(scale);
   return g;
 }
