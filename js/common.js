@@ -217,9 +217,10 @@ export function animateLimbs(g, phase, amp = 0.9, air = false) {
 /* ---------- misc props ---------- */
 export function makeWheel(r, color = 0x222222) {
   const g = new THREE.Group();
-  const t = mesh(new THREE.TorusGeometry(r, r * 0.16, 8, 20), color); t.rotation.y = Math.PI / 2;
-  const s = box(0.05, r * 1.9, 0.05, 0xaaaaaa);
-  g.add(t, s);
+  const tire = mesh(new THREE.TorusGeometry(r * 0.82, r * 0.22, 8, 22), color); tire.rotation.y = Math.PI / 2; g.add(tire);
+  const rim = cyl(r * 0.72, r * 0.72, r * 0.3, 0x9aa0aa, 18); rim.rotation.z = Math.PI / 2; g.add(rim);
+  const hub = cyl(r * 0.28, r * 0.28, r * 0.42, 0xd8dce4, 10); hub.rotation.z = Math.PI / 2; g.add(hub);
+  for (let i = 0; i < 4; i++) { const sp = box(r * 0.34, r * 1.3, r * 0.1, 0x6a707a); sp.rotation.x = i * Math.PI / 4; g.add(sp); }
   g.position.y = r;
   return g;
 }

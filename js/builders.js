@@ -2,6 +2,7 @@ import {
   THREE, box, cyl, sph, cone, mat, mesh,
 } from './common.js';
 import { Platformer } from './platformer.js';
+import { makeCar, makeBuilding, makeLampPost, makeCannon, makeKnight, makePine } from './props.js';
 import { Arena } from './arena.js';
 import { Runner } from './runner.js';
 import { Ship } from './ship.js';
@@ -178,43 +179,25 @@ function highwayObstacle(kind, rng, w) {
     const sign = box(w + 0.8, 1.3, 0.5, 0x1f7a3a); sign.position.y = 1.95 + 0.0; sign.position.y = 1.95; g.add(sign);
     const stripe = box(w - 1, 0.12, 0.52, 0xffffff); stripe.position.y = 2.05; g.add(stripe);
   } else {
-    const c = [0x2f6fd0, 0xd04a2f, 0xe0c030, 0x3aa86a][Math.floor(rng() * 4)];
-    const b = box(w - 0.4, 1.0, 3.4, c); b.position.y = 0.7; g.add(b);
-    const t = box(w - 0.9, 0.7, 1.8, 0x9fdcff); t.position.set(0, 1.45, 0.2); g.add(t);
-    for (const sx of [-1, 1]) for (const sz of [-1.1, 1.1]) { const wl = cyl(0.38, 0.38, 0.3, 0x222222, 10); wl.rotation.z = Math.PI / 2; wl.position.set(sx * (w / 2 - 0.1), 0.38, sz); g.add(wl); }
+    const car = makeCar([0x2f6fd0, 0xd04a2f, 0xe0c030, 0x3aa86a][Math.floor(rng() * 4)]); car.scale.setScalar((w - 0.4) / 2.1); g.add(car);
   }
   return g;
 }
 function highwayScenery(rng) {
   const g = new THREE.Group();
-  if (rng() < 0.7) {
-    const h = rng2(rng, 8, 26);
-    const b = box(rng2(rng, 6, 10), h, rng2(rng, 6, 10), [0xc9b79c, 0xb0b8c2, 0xd4a58f, 0x9fb9c9][Math.floor(rng() * 4)]); b.position.y = h / 2; g.add(b);
-    const win = box(b.geometry.parameters.width * 0.8, h * 0.6, 0.3, 0x56789a); win.position.set(0, h * 0.55, b.geometry.parameters.depth / 2 + 0.05); g.add(win);
-  } else {
-    const p = cyl(0.12, 0.12, 6, 0x444444, 6); p.position.y = 3; g.add(p);
-    const l = sph(0.4, mat(0xfff0a0, 0xaa8800), 6); l.position.y = 6.2; g.add(l);
-  }
+  if (rng() < 0.7) g.add(makeBuilding(rng2(rng, 6, 10), rng2(rng, 8, 26), rng2(rng, 6, 10), [0xc9b79c, 0xb0b8c2, 0xd4a58f, 0x9fb9c9][Math.floor(rng() * 4)]));
+  else g.add(makeLampPost(6.5));
   return g;
 }
 
 function museumObstacle(kind, rng, w) {
   const g = new THREE.Group();
-  if (kind === 'low') { // rolling cannon
-    const barrel = cyl(0.32, 0.42, 2.0, 0x30343c, 10); barrel.rotation.x = Math.PI / 2.4; barrel.position.y = 0.75; g.add(barrel);
-    const base = box(w * 0.8, 0.4, 1.4, 0x6a4a2a); base.position.y = 0.4; g.add(base);
-    for (const s of [-1, 1]) { const wl = cyl(0.5, 0.5, 0.2, 0x6a4a2a, 12); wl.rotation.z = Math.PI / 2; wl.position.set(s * (w * 0.4), 0.5, 0); g.add(wl); }
-    const ball = sph(0.3, 0x222222, 8); ball.position.set(0, 1.0, -1.1); g.add(ball);
-  } else if (kind === 'high') { // chandelier / hanging blades
+  if (kind === 'low') { const c = makeCannon(); c.scale.setScalar(w / 2.6); g.add(c); }
+  else if (kind === 'high') {
     const bar = box(w + 0.8, 0.5, 0.8, 0xd9b44a); bar.position.y = 1.9; g.add(bar);
     for (let i = -3; i <= 3; i++) { const bl = cone(0.18, 0.8, 0xd8dde6, 4); bl.rotation.x = Math.PI; bl.position.set(i * (w / 6.5), 1.4, 0); g.add(bl); }
     for (const s of [-1, 1]) { const ch = box(0.12, 3, 0.12, 0x777777); ch.position.set(s * (w / 2), 3.4, 0); g.add(ch); }
-  } else { // armour knight
-    const body = mesh(new THREE.CapsuleGeometry(0.55, 1.2, 4, 10), 0x9aa3ae); body.position.y = 1.3; g.add(body);
-    const head = sph(0.4, 0xb6bec8, 10); head.position.y = 2.5; g.add(head);
-    const plume = cone(0.15, 0.7, 0xd0383f, 6); plume.position.y = 3.1; g.add(plume);
-    const sword = box(0.12, 2.4, 0.12, 0xdfe5ee); sword.position.set(0.8, 1.5, 0); g.add(sword);
-  }
+  } else g.add(makeKnight());
   return g;
 }
 function museumScenery(rng) {
@@ -241,20 +224,14 @@ function skiObstacle(kind, rng, w) {
     const bar = box(w + 0.6, 1.1, 0.4, 0xd0383f); bar.position.y = 2.0; g.add(bar);
     const st = box(w - 0.5, 0.25, 0.42, 0xffffff); st.position.y = 2.0; g.add(st);
   } else {
-    const t = new THREE.Group();
-    const tr = cyl(0.3, 0.4, 1.2, 0x5b3a21, 6); tr.position.y = 0.6; t.add(tr);
-    for (let i = 0; i < 3; i++) { const c = cone(1.6 - i * 0.35, 2, 0x1f7a3a, 8); c.position.y = 1.8 + i * 1.2; t.add(c); }
-    const sn = cone(0.5, 0.8, 0xffffff, 8); sn.position.y = 5.0; t.add(sn);
-    g.add(t);
+    g.add(makePine(1, true));
   }
   return g;
 }
 function skiScenery(rng) {
   const g = new THREE.Group();
-  const s = rng2(rng, 0.8, 1.7);
-  const tr = cyl(0.3, 0.4, 1.2, 0x5b3a21, 6); tr.position.y = 0.6 * s; tr.scale.setScalar(s); g.add(tr);
-  for (let i = 0; i < 3; i++) { const c = cone((1.8 - i * 0.4) * s, 2.2 * s, 0x2a8a46, 8); c.position.y = (1.8 + i * 1.3) * s; g.add(c); }
-  if (rng() < 0.3) { const l = sph(0.2, mat(0xff4455, 0x882222), 6); l.position.set(0.8 * s, 2.2 * s, 0.8 * s); g.add(l); }
+  g.add(makePine(rng2(rng, 0.8, 1.7), true));
+  if (rng() < 0.3) { const l = sph(0.2, mat(0xff4455, 0x882222), 6); l.position.set(1.4, 3, 1.4); g.add(l); }
   return g;
 }
 

@@ -3,6 +3,7 @@ import {
   makeHare, makeWolf, makeRobotHare, makeWheel, animateLimbs, mulberry32, damp, clamp, lerp,
 } from './common.js';
 import { sfx } from './audio.js';
+import { makeBike, makeMotorcycle, makeCar, makeSteamroller, makeTrain } from './props.js';
 import { ui } from './ui.js';
 
 const LW = 3.2; // lane width
@@ -95,13 +96,8 @@ export class Runner {
     inner.rotation.y = Math.PI;
     group.add(inner);
     if (kind === 'bike') {
-      inner.position.y = 0.38; inner.scale.setScalar(0.82);
-      const w1 = makeWheel(0.4), w2 = makeWheel(0.4);
-      w1.position.z = -0.65; w2.position.z = 0.65;
-      const frame = box(0.07, 0.07, 1.3, 0xd43a3a); frame.position.y = 0.62;
-      const bar = box(0.8, 0.06, 0.06, 0x333333); bar.position.set(0, 1.0, -0.62);
-      const post = box(0.06, 0.45, 0.06, 0x333333); post.position.set(0, 0.8, -0.62);
-      group.add(w1, w2, frame, bar, post); wheels = [w1, w2];
+      inner.position.y = 0.42; inner.scale.setScalar(0.82);
+      const bike = makeBike(); group.add(bike); wheels = bike.userData.wheels;
     } else if (kind === 'ski') {
       inner.position.y = 0.07;
       for (const s of [-1, 1]) { const sk = box(0.18, 0.07, 1.9, 0xd43a3a); sk.position.set(s * 0.22, 0.035, 0); group.add(sk); }
@@ -114,32 +110,13 @@ export class Runner {
     const g = new THREE.Group(); const c = { g, kind, wheels: [], anim: null };
     const wolfOn = (y, z, sc) => { const w = makeWolf({ scale: sc }); w.rotation.y = Math.PI; w.position.set(0, y, z); g.add(w); return w; };
     if (kind === 'motorcycle') {
-      const w1 = makeWheel(0.42), w2 = makeWheel(0.42); w1.position.z = -0.75; w2.position.z = 0.75;
-      const body = box(0.55, 0.45, 1.6, 0xc0392b); body.position.y = 0.75;
-      const lamp = sph(0.2, mat(0xffffcc, 0xaaaa44), 8); lamp.position.set(0, 1.0, -0.95);
-      g.add(w1, w2, body, lamp); c.wheels = [w1, w2]; wolfOn(0.55, 0.15, 0.9);
+      const m = makeMotorcycle(); g.add(m); c.wheels = m.userData.wheels; wolfOn(0.6, 0.2, 0.9);
     } else if (kind === 'car') {
-      const body = box(2.1, 0.7, 4, 0xd8232a); body.position.y = 0.75;
-      const wind = box(1.7, 0.5, 0.1, 0x9fdcff); wind.position.set(0, 1.35, -0.55); wind.rotation.x = -0.4;
-      g.add(body, wind);
-      for (const sx of [-1, 1]) for (const sz of [-1.3, 1.3]) { const w = makeWheel(0.42); w.position.set(sx * 1.1, 0, sz); g.add(w); c.wheels.push(w); }
-      for (const sx of [-1, 1]) { const l = sph(0.22, mat(0xffffcc, 0xaaaa44), 8); l.position.set(sx * 0.7, 0.85, -2.0); g.add(l); }
-      wolfOn(0.85, 0.5, 0.8);
+      const m = makeCar(0xd8232a); g.add(m); c.wheels = m.userData.wheels; wolfOn(1.0, 0.3, 0.8);
     } else if (kind === 'steamroller') {
-      const body = box(2.5, 1.5, 3.4, 0xf0b400); body.position.set(0, 1.6, 0.6);
-      const cab = box(2.1, 0.12, 1.6, 0x6b4f00); cab.position.set(0, 3.0, 1.0);
-      const roller = cyl(1.15, 1.15, 2.8, 0x8a8a8a, 20); roller.rotation.z = Math.PI / 2; roller.position.set(0, 1.15, -1.7);
-      const pipe = cyl(0.15, 0.15, 1.2, 0x333333, 8); pipe.position.set(0.8, 3.0, 0.2);
-      g.add(body, cab, roller, pipe); c.wheels = [roller];
-      for (const sx of [-1, 1]) { const w = makeWheel(1.1); w.position.set(sx * 1.4, 0, 1.4); g.add(w); c.wheels.push(w); }
-      wolfOn(2.1, 1.1, 0.9);
+      const m = makeSteamroller(); g.add(m); c.wheels = m.userData.wheels; wolfOn(2.2, 1.0, 0.9);
     } else if (kind === 'train') {
-      const body = box(3.4, 3.2, 9, 0x2a64b8); body.position.set(0, 1.9, 2);
-      const stripe = box(3.45, 0.5, 9.05, 0xffffff); stripe.position.set(0, 1.5, 2);
-      const win = box(3.5, 0.9, 7, 0x9fdcff); win.position.set(0, 2.5, 2.3);
-      g.add(body, stripe, win);
-      for (const sx of [-1, 1]) { const l = sph(0.28, mat(0xffffcc, 0xffffaa), 8); l.position.set(sx * 1.0, 1.3, -2.55); g.add(l); }
-      wolfOn(3.5, 0.5, 0.9);
+      g.add(makeTrain()); wolfOn(3.7, 0.5, 0.9);
     } else if (kind === 'robot') {
       const r = makeRobotHare(); r.scale.setScalar(2.6); r.rotation.y = Math.PI; g.add(r); c.anim = r;
     } else if (kind === 'wolfdress') {
